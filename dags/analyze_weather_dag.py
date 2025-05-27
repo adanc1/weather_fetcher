@@ -1,12 +1,7 @@
-import os
-
 from airflow import DAG
 from airflow.providers.docker.operators.docker import DockerOperator
 from airflow.utils.dates import days_ago
 from docker.types import Mount
-
-
-data_dir = os.path.abspath("data")
 
 
 with DAG(
