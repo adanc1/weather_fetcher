@@ -23,6 +23,6 @@ with DAG(
         ],
         mount_tmp_dir=False,
         docker_url="unix://var/run/docker.sock",
-        network_mode="bridge",
+        network_mode="etl_net",
         environment={"DATA_DIR": "/app/data"}
     )

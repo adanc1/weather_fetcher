@@ -20,7 +20,6 @@ x-airflow-common:
     - postgres
 
 services:
-
   postgres:
     image: postgres:15
     environment:
@@ -31,25 +30,84 @@ services:
       - postgres-db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - etl_net
+
+  etl-postgres:
+    image: postgres:15
+    container_name: etl-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - etl-db:/var/lib/postgresql/data
+    networks:
+      - etl_net
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - etl_net
+
+  init-db:
+    image: postgres:15
+    depends_on:
+      - etl-postgres
+    volumes:
+      - ./sql:/sql
+      - ./bin/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    entrypoint: [ "bash", "/docker-entrypoint-initdb.d/init_db.sh" ]
+    networks:
+      - etl_net
 
   init:
     <<: *airflow-common
     command: >
       bash -c "airflow db migrate &&
       airflow users create --username admin --password admin --firstname Admin --lastname Admin --role Admin --email admin@example.org"
+    networks:
+      - etl_net
   
 
   scheduler:
     <<: *airflow-common
     command: scheduler
+    networks:
+      - etl_net
 
   webserver:
     <<: *airflow-common
     ports:
       - "8080:8080"
     command: webserver
+    networks:
+      - etl_net
 
 volumes:
   postgres-db:
+  etl-db:
+  pgadmin-data:
   logs:
   data:
+
+networks:
+  etl_net:
+    name: etl_net
