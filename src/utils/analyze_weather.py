@@ -8,7 +8,12 @@ def analyze_weather_data():
         if not rows:
             print("No data to analyze.")
             return
-        city_id = crud.get_or_create_city(CITY)
+
+        city_id = crud.get_city_id(CITY)
+        if city_id is None:
+            crud.insert_location(CITY)
+            city_id = crud.get_city_id(CITY)
+
         for date, avg_temp, avg_wind, avg_hum in rows:
             crud.insert_daily_stats(date, city_id, avg_temp, avg_wind, avg_hum)
 

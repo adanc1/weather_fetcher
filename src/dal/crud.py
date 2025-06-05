@@ -2,20 +2,23 @@ from datetime import date
 from .base import get_db_cursor
 
 
-def get_or_create_city(city: str) -> int:
+def get_city_id(city: str) -> int:
+    with get_db_cursor() as cur:
+        cur.execute("SELECT id FROM location WHERE city = %s;", (city,))
+        result = cur.fetchone()
+    return result[0] if result else None
+
+
+def insert_location(city: str) -> int:
     with get_db_cursor() as cur:
         cur.execute(
             """
             INSERT INTO location (city) 
-            VALUES (%s)
-            ON CONFLICT (city) DO NOTHING;
+            VALUES (%s);
             """
             ,
             (city,)
         )
-        cur.execute("SELECT id FROM location WHERE city = %s;", (city,))
-        result = cur.fetchone()
-        return result[0] if result else None
 
 
 def insert_weather_data(

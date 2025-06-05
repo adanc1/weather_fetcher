@@ -25,7 +25,12 @@ def get_weather_data():
         humidity = data['main'].get('humidity')
         wind_speed = data['wind'].get('speed')
         date = datetime.now(timezone.utc).date()
-        city_id = crud.get_or_create_city(CITY)
+
+        city_id = crud.get_city_id(CITY)
+        if city_id is None:
+            crud.insert_location(CITY)
+            city_id = crud.get_city_id(CITY)
+
         crud.insert_weather_data(
             city_id=city_id,
             date_=date,
