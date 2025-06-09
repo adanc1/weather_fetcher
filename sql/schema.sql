@@ -27,3 +27,6 @@ CREATE TABLE IF NOT EXISTS daily_weather_stats (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by INTEGER DEFAULT 1
 );
+
+ALTER TABLE daily_weather_stats
+ADD CONSTRAINT unique_date_city UNIQUE (report_date, city_id);

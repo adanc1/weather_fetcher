@@ -59,6 +59,11 @@ def insert_daily_stats(
             """
             INSERT INTO daily_weather_stats (report_date, city_id, avg_temp, max_wind, avg_hum)
             VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (report_date, city_id)
+            DO UPDATE SET
+                avg_temp = EXCLUDED.avg_temp,
+                max_wind = EXCLUDED.max_wind,
+                avg_hum = EXCLUDED.avg_hum;
             """,
             (report_date, city_id, avg_temp, max_wind, avg_hum)
         )
