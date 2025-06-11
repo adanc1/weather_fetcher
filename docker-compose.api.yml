@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  web-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: web-dev
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    networks:
+      - etl_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  etl_net:
+    name: etl_net

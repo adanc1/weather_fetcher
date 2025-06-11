@@ -1,0 +1,5 @@
+fastapi[all]==0.115.12
+sqlmodel==0.0.24
+sqlalchemy==2.0.41
+python-decouple==3.8
+asyncpg==0.30.0
