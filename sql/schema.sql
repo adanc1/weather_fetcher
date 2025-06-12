@@ -30,3 +30,15 @@ CREATE TABLE IF NOT EXISTS daily_weather_stats (
 
 ALTER TABLE daily_weather_stats
 ADD CONSTRAINT unique_date_city UNIQUE (report_date, city_id);
+
+
+CREATE TABLE anomalies (
+    id SERIAL PRIMARY KEY,
+    city_id INTEGER NOT NULL REFERENCES location(id),
+    detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    current_temp DECIMAL,
+    avg_temp_last_7d DECIMAL,
+    source_record_id INTEGER REFERENCES weather_data(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER DEFAULT 1
+);

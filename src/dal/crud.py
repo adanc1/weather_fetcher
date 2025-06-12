@@ -47,6 +47,17 @@ def get_weather_data() -> list:
     return rows
 
 
+def get_weather_last_record(city_id: int) -> list:
+    with get_db_cursor() as cur:
+        cur.execute(
+            "SELECT * FROM weather_data WHERE id=(SELECT max(id) FROM weather_data WHERE city_id=%s);",
+            (city_id,)
+        )
+        rows = cur.fetchone()
+    return rows
+
+
+
 def insert_daily_stats(
     report_date: date,
     city_id: int,
@@ -84,3 +95,33 @@ def get_daily_stats() -> list:
         )
         rows = cur.fetchall()
     return rows
+
+
+def get_last_7_days_avg(city_id: int) -> float:
+    with get_db_cursor() as cur:
+        cur.execute(
+            """
+            SELECT AVG(avg_temp) FROM daily_weather_stats
+            WHERE city_id = %s AND  report_date >= current_date - interval '7 days'
+	        """,
+            (city_id,)
+        )
+        rows = cur.fetchone()
+    return rows[0] if rows else None
+
+
+def insert_anomalies(
+    city_id: int,
+    current_temp: float,
+    avg_temp_last_7d: float,
+    source_record_id: int
+):
+    with get_db_cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO anomalies (city_id, current_temp, avg_temp_last_7d, source_record_id)
+            VALUES (%s, %s, %s, %s);
+            """
+            ,
+            (city_id, current_temp, avg_temp_last_7d, source_record_id)
+        )
