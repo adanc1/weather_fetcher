@@ -1,4 +1,5 @@
 from dal import crud
+from .tg_message_handler import send_message
 
 CITY = 'Lviv'
 
@@ -20,8 +21,14 @@ def get_anomalies():
         print("No data for last 7 days")
         return
 
-    if (float(current_temp) - float(avg_temp)) < 0:
+    if (float(current_temp) - float(avg_temp)) < 10:
         crud.insert_anomalies(city_id, current_temp, avg_temp, source_id)
+        send_message(
+            f"⚠️ <b>Anomaly detected</b>\n"
+            f"🌡️ Current temperature: {current_temp:.1f}°C\n"
+            f"📊 7-day average: {avg_temp:.1f}°C\n"
+            f"🧥 <i>It might be unusual today — consider dressing accordingly!</i>"
+        )
 
     print("Anomalies has been checked successfully.")
 
